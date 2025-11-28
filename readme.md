@@ -1,7 +1,7 @@
 # SecureWatch
 
-![Screenshot 1](mini5\1.png)
-![Screenshot 2](mini5\2.png)
+![Screenshot 1](1.png)
+![Screenshot 2](2.png)
 
 
 ## ⚙️ Installation & Setup

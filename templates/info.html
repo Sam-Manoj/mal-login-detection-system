@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information - SecureWatch</title>
+    <!-- Link to static CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Links updated to use url_for -->
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i data-lucide="shield-check"></i>
+                    <span>SecureWatch</span>
+                </a>
+                <nav class="main-nav">
+                    <a href="{{ url_for('index') }}">About</a>
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('info') }}" class="active">Info</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container info-page">
+            <h1 class="section-title">System Documentation</h1>
+            <div class="tabs">
+                <button class="tab-link active" data-tab="overview">Overview</button>
+                <button class="tab-link" data-tab="dashboard-guide">Dashboard Guide</button>
+                <button class="tab-link" data-tab="risk-scoring">Risk Scoring</button>
+                <button class="tab-link" data-tab="faq">FAQs</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <h2>Overview</h2>
+                <p>SecureWatch is a real-time security monitoring platform designed to protect your application by analyzing login attempts for suspicious behavior. Using a Bayesian Network, it intelligently assesses risk based on multiple factors, providing a clear and immediate overview of potential threats.</p>
+                <h3>Key Components</h3>
+                <div class="info-grid">
+                    <div class="card"><h4>Real-time Feed</h4><p>The dashboard displays every login attempt as it happens, updated live via WebSockets.</p></div>
+                    <div class="card"><h4>Bayesian Risk Scoring</h4><p>Our core logic uses a probabilistic model (Bayesian Network) to calculate a precise risk score (0-100) for suspicious logins.</p></div>
+                    <div class="card"><h4>Threat Geolocation</h4><p>High-risk attempts are mapped, allowing you to visualize the geographic origin of potential threats.</p></div>
+                </div>
+            </div>
+
+            <div id="dashboard-guide" class="tab-content">
+                <h2>Dashboard Guide</h2>
+                <p>The admin dashboard is your central command center for monitoring security events.</p>
+                <ul>
+                    <li><strong>Real-time Login Feed:</strong> This is the main table showing all logged attempts. It is color-coded by risk level.</li>
+                    <li><strong>Real-time Statistics:</strong> The counters in the sidebar (Total, Blocked, etc.) update live with every new login attempt.</li>
+                    <li><strong>Malicious Attempt Map:</strong> This map plots the location of all high-risk (Blocked) login attempts in real-time.</li>
+                    <li><strong>Status Badges:</strong>
+                        <ul>
+                            <li><strong>Blocked (Red):</strong> High-risk (Score > 75). These are critical events, often from repeated failures (which we auto-log with score 99).</li>
+                            <li><strong>Flagged (Yellow):</strong> Medium-risk (Score 41-75). This status is used for successful logins that are flagged by the Bayesian Network.</li>
+                            <li><strong>Allowed (Green):</strong> Low-risk (Score 0-40). This status is for successful, trusted logins.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="risk-scoring" class="tab-content">
+                <h2>How Risk Scoring Works</h2>
+                <p>Our system logs both successful and failed attempts to provide a complete security picture, while still focusing on the most critical threats.</p>
+                <ol>
+                    <li><strong>Successful "Trusted" Logins:</strong> When a user logs in successfully (e.g., `employee`) and has **fewer than 3** recent failures, they are considered "Trusted." This event is logged with a low risk score (e.g., 10) and appears as **"Allowed" (Green)** on the dashboard.</li>
+                    <li><strong>Successful "Suspicious" Logins:</strong> If a user logs in successfully but has **3 or more** recent failures, they are "Suspicious." The system runs a full **Bayesian Network analysis** on this login, using the failure count as evidence. The resulting score (e.g., 65) is logged, and the event appears as **"Flagged" (Yellow)**.</li>
+                    <li><strong>Failed Logins (Ignored):</strong> The first 2 failed attempts for a user are ignored to reduce noise.</li>
+                    <li><strong>Failed "Malicious" Logins:</strong> The **3rd failed attempt** (and any after it) is considered "Malicious." The system immediately logs this failure with a **Risk Score of 99** and a status of **"Blocked" (Red)**. This instantly alerts the admin and plots the location on the map.</li>
+                </ol>
+            </div>
+            
+            <div id="faq" class="tab-content">
+                <h2>Frequently Asked Questions</h2>
+                
+                <h4>Why do I only see "Blocked" events on the dashboard?</h4>
+                <p>In this version, the system is designed to only log *failed* login attempts, which are the most critical security event. It automatically gives them a score of 99 ("Blocked") to alert you. Successful logins from non-admins are not logged to reduce noise.</p>
+
+                <h4>How do I create the training data?</h4>
+                <p>The Bayesian Network is trained on a CSV file. If `synthetic_dataset_for_training.csv` is not found, you can generate it by running **`python pgm_model.py`** from your terminal. This will create the file for you.</p>
+
+                <h4>How do I add a new user?</h4>
+                <p>This app does not have a public registration page. The `employee` and `manager` accounts are created automatically by `APP.PY` on first run for testing. You can add more users by modifying the `setup_database` function in `APP.PY`.</p>
+            </div>
+            
+            <!-- This section is static as per your design -->
+            <div class="info-footer">
+                <div class="card">
+                    <h3>Need More Help?</h3>
+                    <div class="info-grid">
+                        <div class="card"><h4>Documentation</h4><p>Comprehensive guides and API docs.</p><a href="#" class="btn-outline">View Docs</a></div>
+                        <div class="card"><h4>Support</h4><p>24/7 technical support and assistance.</p><a href="#" class="btn-outline">Contact Support</a></div>
+                        <div class="card"><h4>Community</h4><p>Join our community forum and discussions.</p><a href="#" class="btn-outline">Join Community</a></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Links updated to use url_for -->
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i data-lucide="shield-check"></i>
+                    <span>SecureWatch</span>
+                </a>
+                <div class="footer-authors">
+                    Project by: Sharon, Sam, Nandini, Aaron
+                </div>
+                <div class="main-nav">
+                    <a href="{{ url_for('index') }}">About</a>
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('info') }}">Documentation</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 SecureWatch. Advanced security monitoring platform.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Links to static JS file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

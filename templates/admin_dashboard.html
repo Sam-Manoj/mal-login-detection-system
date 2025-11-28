@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SecureWatch</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- MODIFIED: Added Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- MODIFIED: Added Socket.IO script for real-time updates -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <div class="dashboard-grid">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <!-- MODIFIED: Link updated to url_for -->
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i data-lucide="shield"></i>
+                    <h1>SecureWatch</h1>
+                </a>
+            </div>
+            <div class="sidebar-block">
+                <h2>Real-time Statistics</h2>
+                <div class="stats-grid">
+                    <!-- MODIFIED: Added IDs and initial values from Flask -->
+                    <div class="stat-card"><span id="stats-total">{{ stats.total }}</span> Total</div>
+                    <div class="stat-card"><span id="stats-blocked">{{ stats.blocked }}</span> Blocked</div>
+                    <div class="stat-card"><span id="stats-flagged">{{ stats.flagged }}</span> Flagged</div>
+                    <div class="stat-card"><span id="stats-allowed">{{ stats.allowed }}</span> Allowed</div>
+                </div>
+            </div>
+            <div class="sidebar-block">
+                <h2>Quick Actions</h2>
+                <!-- MODIFIED: Logout link updated to url_for -->
+                <a href="{{ url_for('logout') }}" class="btn btn-full btn-danger">
+                    <i data-lucide="log-out"></i> Sign Out
+                </a>
+                
+            </div>
+            <nav class="sidebar-nav">
+                <!-- MODIFIED: Links updated to url_for -->
+                <a href="{{ url_for('admin_dashboard') }}" class="active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                <a href="{{ url_for('index') }}"><i data-lucide="home"></i> About Page</a>
+                <a href="{{ url_for('info') }}"><i data-lucide="info"></i> Info Page</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <h2><i data-lucide="activity"></i> Real-time Login Feed</h2>
+                <p>All suspicious and successful login attempts from all users. Updates automatically.</p>
+            </header>
+
+            <div class="dashboard-content">
+                <div class="table-wrapper">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp (UTC)</th>
+                                <th>User</th>
+                                <th>IP Address</th>
+                                <th>Risk</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <!-- 
+                        MODIFIED: This tbody is now dynamic.
+                        It will be populated by our Jinja loop and updated by Socket.IO.
+                        -->
+                        <tbody id="log-table-body">
+                            {% for attempt in attempts %}
+                                <!-- Set risk class for coloring and status -->
+                                {% set risk_class = 'low' %}
+                                {% set status_text = 'Allowed' %}
+                                {% set status_class = 'status-allowed' %}
+
+                                {% if attempt.risk_score > 75 %}
+                                    {% set risk_class = 'high' %}
+                                    {% set status_text = 'Blocked' %}
+                                    {% set status_class = 'status-blocked' %}
+                                {% elif attempt.risk_score > 40 %}
+                                    {% set risk_class = 'medium' %}
+                                    {% set status_text = 'Flagged' %}
+                                    {% set status_class = 'status-flagged' %}
+                                {% endif %}
+                                
+                                <!-- Add data attributes for the map to read -->
+                                <tr class="risk-{{ risk_class }}" 
+                                    {% if attempt.is_malicious and attempt.lat and attempt.lon %}
+                                        data-lat="{{ attempt.lat }}" 
+                                        data-lon="{{ attempt.lon }}"
+                                        data-user="{{ attempt.username | e }}"
+                                        data-ip="{{ attempt.ip_address | e }}"
+                                    {% endif %}>
+                                    <td>{{ attempt.login_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        <div class="user-cell">
+                                            <!-- Create avatar from first letter of username -->
+                                            <span class="user-avatar">{{ attempt.username[0] | upper if attempt.username else '?' }}</span>
+                                            {{ attempt.username | e }} <!-- |e escapes HTML -->
+                                        </div>
+                                    </td>
+                                    <td>{{ attempt.ip_address | e }}</td>
+                                    <td>
+                                        <div class="risk-cell">
+                                            <span class="risk-bar-wrapper">
+                                                <span class="risk-bar" style="width: {{ attempt.risk_score }}%;"></span>
+                                            </span>
+                                            {{ attempt.risk_score }}%
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {{ status_class }}">{{ status_text }}</span>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr id="no-attempts-row">
+                                    <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No login attempts recorded yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MODIFIED: Analytics grid now includes the map -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3><i data-lucide="pie-chart"></i> Risk Level Breakdown</h3>
+                        <ul class="risk-summary-list">
+                            <!-- MODIFIED: These values are now dynamic -->
+                            <li class="risk-item">
+                                <span>High Risk (Blocked)</span>
+                                <div class="risk-bar-wrapper"><span class="risk-bar" style="width: {{ (stats.blocked / stats.total * 100) if stats.total > 0 else 0 }}%; background: var(--risk-high);"></span></div>
+                                <span id="stats-blocked-percent">{{ stats.blocked }}</span>
+                            </li>
+                            <li class="risk-item">
+                                <span>Medium Risk (Flagged)</span>
+                                <div class="risk-bar-wrapper"><span class="risk-bar" style="width: {{ (stats.flagged / stats.total * 100) if stats.total > 0 else 0 }}%; background: var(--risk-medium);"></span></div>
+                                <span id="stats-flagged-percent">{{ stats.flagged }}</span>
+                            </li>
+                            <li class="risk-item">
+                                <span>Low Risk (Allowed)</span>
+                                <div class="risk-bar-wrapper"><span class="risk-bar" style="width: {{ (stats.allowed / stats.total * 100) if stats.total > 0 else 0 }}%; background: var(--risk-low);"></span></div>
+                                <span id="stats-allowed-percent">{{ stats.allowed }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- MODIFIED: This card is now a live map -->
+                    <div class="analytics-card">
+                        <h3><i data-lucide="map-pin"></i> Malicious Attempt Map</h3>
+                        <div id="world-map"></div> <!-- Map will be initialized here -->
+                        <div class="map-legend" style="padding-top: 1rem;">
+                            <span style="color: var(--risk-high);"><i style="background: var(--risk-high);"></i> High Risk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- This script loads the icon library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- MODIFIED: Added Leaflet JS for the map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- This script links to your external JS file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

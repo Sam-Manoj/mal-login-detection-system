@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SecureWatch</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-container">
+            <!-- Link updated to use url_for -->
+            <a href="{{ url_for('index') }}" class="logo">
+                <i data-lucide="shield-check"></i>
+                <span>SecureWatch</span>
+            </a>
+            <h2>Access your security dashboard</h2>
+
+            <!-- This is new: a place to show "Invalid password" messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <!-- Uses the .flash.error style from your CSS -->
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <!-- MODIFIED: This is now a real form that POSTs data to your app -->
+            <form class="login-form" method="POST" action="{{ url_for('login') }}">
+                <!-- MODIFIED: Added 'name' attribute for Flask -->
+                <input type="text" placeholder="Username" name="username" required>
+                <!-- MODIFIED: Added 'name' attribute for Flask -->
+                <input type="password" placeholder="Password" name="password" required>
+                <!-- MODIFIED: Changed from <a> tag to a real <button> to submit the form -->
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <p class="demo-creds">Demo credentials: admin / admin123</p>
+            <p class="security-notice">
+                Your login attempts are monitored and logged for security purposes. Unauthorized access attempts will be reported.
+            </p>
+            <!-- Link updated to use url_for -->
+            <a href="{{ url_for('index') }}" class="back-link">&larr; Back to About</a>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- MODIFIED: Link to the single main.js file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

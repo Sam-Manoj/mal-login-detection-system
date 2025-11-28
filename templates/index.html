@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - SecureWatch</title>
+    <!-- Links to static CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Links updated to use url_for -->
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i data-lucide="shield-check"></i>
+                    <span>SecureWatch</span>
+                </a>
+                <nav class="main-nav">
+                    <a href="{{ url_for('index') }}" class="active">About</a>
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('info') }}">Info</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <!-- This is new: a place to show flash messages (e.g., "Logged out") -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <!-- Use your .flash.success or .flash.error styles -->
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <span class="badge">Advanced Security Monitoring</span>
+                <h1>Real-time Threat Detection & Response</h1>
+                <p>
+                    SecureWatch provides comprehensive security monitoring with real-time login attempt analysis, geographic
+                    threat mapping, and intelligent risk assessment to protect your organization.
+                </p>
+                <div class="cta-buttons">
+                    <!-- Links updated to use url_for -->
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn">View Dashboard</a>
+                    <a href="{{ url_for('info') }}" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+        </section>
+        
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.51/build/spline-viewer.js"></script>
+        <spline-viewer url="https://prod.spline.design/5Mk4etDzMAvhUDoj/scene.splinecode"></spline-viewer>
+        
+        <section class="features-section">
+            <div class="container">
+                <h2 class="section-title">Advanced Security Features</h2>
+                <div class="features-grid">
+                    <div class="card">
+                        <i data-lucide="eye" class="icon"></i>
+                        <h3>Real-time Monitoring</h3>
+                        <p>Live feed of all login attempts with instant risk assessment and status updates.</p>
+                        <ul>
+                            <li>• Username tracking</li>
+                            <li>• Timestamp logging</li>
+                            <li>• Status monitoring</li>
+                            <li>• Risk scoring</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="map-pin" class="icon"></i>
+                        <h3>Geographic Mapping</h3>
+                        <p>Interactive world map showing the location of high-risk login attempts.</p>
+                        <ul>
+                            <li>• Global threat visualization</li>
+                            <li>• Risk-based color coding</li>
+                            <li>• Location clustering</li>
+                            <li>• Zoom capabilities</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="alert-triangle" class="icon text-accent"></i>
+                        <h3>Intelligent Alerts</h3>
+                        <p>Contextual alerts that explain why login attempts were flagged as suspicious.</p>
+                        <ul>
+                            <li>• Anomaly detection</li>
+                            <li>• Risk explanation</li>
+                            <li>• Priority classification</li>
+                            <li>• Action recommendations</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="clock" class="icon"></i>
+                        <h3>Historical Analysis</h3>
+                        <p>Comprehensive logging and analysis of security events over time.</p>
+                        <ul>
+                            <li>• Trend analysis</li>
+                            <li>• Pattern recognition</li>
+                            <li>• Reporting tools</li>
+                            <li>• Data export</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="users" class="icon"></i>
+                        <h3>User Management</h3>
+                        <p>Advanced user authentication and access control systems.</p>
+                        <ul>
+                            <li>• Role-based access</li>
+                            <li>• Multi-factor auth</li>
+                            <li>• Session management</li>
+                            <li>• Audit trails</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="shield-alert" class="icon text-accent"></i>
+                        <h3>Threat Intelligence</h3>
+                        <p>AI-powered risk assessment with machine learning algorithms.</p>
+                        <ul>
+                            <li>• Behavioral analysis</li>
+                            <li>• Risk scoring</li>
+                            <li>• Predictive modeling</li>
+                            <li>• Automated responses</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta-section">
+            <div class="container">
+                 <h2 class="section-title">Ready to Secure Your Organization?</h2>
+                 <p>Get started with SecureWatch today and experience next-generation security monitoring.</p>
+                 <!-- Link updated to use url_for -->
+                 <a href="{{ url_for('login') }}" class="btn">Get Started</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Links updated to use url_for -->
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i data-lucide="shield-check"></i>
+                    <span>SecureWatch</span>
+                </a>
+                <div class="footer-authors">
+                    Project by: Sharon, Sam, Nandini, Aaron
+                </div>
+                <div class="main-nav">
+                    <a href="{{ url_for('index') }}">About</a>
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('info') }}">Documentation</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 SecureWatch. Advanced security monitoring platform.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Links to static JS file -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
